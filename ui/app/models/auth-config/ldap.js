@@ -12,6 +12,7 @@ export default AuthConfig.extend({
     editType: 'file',
   }),
   fieldGroups: computed('newFields', function() {
+    console.log('calc ldap field groups');
     let groups = [
       {
         default: ['url'],
@@ -39,6 +40,7 @@ export default AuthConfig.extend({
         'Customize Group Membership Search': ['groupfilter', 'groupattr', 'groupdn', 'useTokenGroups'],
       },
     ];
+    debugger;
     if (this.newFields) {
       groups = combineFieldGroups(groups, this.newFields, []);
     }

@@ -28,3 +28,17 @@
   </Toolbar>
 {{/if}}
 {{component (concat "auth-method/" section) model=model}}
+{{log (get model.authConfigs "certificate") "Auth Configs"}}
+{{#each special.fieldGroups as |fieldGroup|}}
+  {{#each-in fieldGroup as |group fields|}}
+    {{#if (not-eq group "default")}}
+      <p class="is-title">{{group}}</p>
+    {{/if}}
+    {{#each fields as |attr|}}
+      <InfoTableRow
+        @alwaysRender={{true}}
+        @label={{or attr.options.label (to-label attr.name)}}
+        @value={{get model.authConfigs attr.name}} />
+    {{/each}}
+  {{/each-in}}
+  {{/each}}

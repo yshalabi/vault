@@ -56,6 +56,7 @@ let ModelExport = Model.extend({
   }),
 
   formFields: computed(function() {
+    console.log('calc reg field groups');
     return [
       'type',
       'path',
