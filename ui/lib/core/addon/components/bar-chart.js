@@ -127,6 +127,15 @@ class BarChartComponent extends Component {
     let yAxis = axisLeft(yScale);
     yAxis(groups.append('g'));
 
+    // let testGroups = chartSvg
+    // .selectAll('g')
+    // .data(dataset)
+    // .enter()
+    // .append('g')
+
+    // let yAxis = axisLeft(yScale);
+    // yAxis(testGroups.append('g'));
+
     let truncate = selection =>
       selection.text(string =>
         string.length < CHAR_LIMIT ? string : string.slice(0, CHAR_LIMIT - 3) + '...'
@@ -275,19 +284,38 @@ class BarChartComponent extends Component {
 
     // TODO: these render twice, need to only render and append once per line
     // creates total count text and coordinates to display to the right of data bars
-    let totalCountData = [];
-    rects.each(function(d) {
-      let textDatum = {
-        total: d.data.total,
-        x: parseFloat(select(this).attr('width')) + parseFloat(select(this).attr('x')),
-        y: parseFloat(select(this).attr('y')) + parseFloat(select(this).attr('height')),
-      };
-      totalCountData.push(textDatum);
-    });
+    // let totalCountData = [];
+    // rects.each(function(d) {
+    //   let textDatum = {
+    //       total: d.data.total,
+    //       x: parseFloat(select(this).attr('width')) + parseFloat(select(this).attr('x')),
+    //       y: parseFloat(select(this).attr('y')) + parseFloat(select(this).attr('height')),
+    //     };
+    //     totalCountData.push(textDatum);
+    //   }
+    // );
 
+    let test = [];
+    let totalCountData = {};
+    rects.each(function(d) {
+      // if (Object.keys(totalCountData).includes(d.data.label)){
+      //   debugger
+      // }
+      test.push({
+        label: (totalCountData[d.data.label] = {
+          total: d.data.total,
+          // x: select(this).attr('x'),
+          // y: select(this).attr('y'),
+          // width: select(this).attr('width'),
+          // height: select(this).attr('height'),
+          x: parseFloat(select(this).attr('width')) + parseFloat(select(this).attr('x')),
+          y: parseFloat(select(this).attr('y')) + parseFloat(select(this).attr('height')),
+        }),
+      });
+    });
     groups
       .selectAll('text')
-      .data(totalCountData)
+      .data(test)
       .enter()
       .append('text')
       .text(d => d.total)
