@@ -1,3 +1,8 @@
+.test-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+}
+
 .bar-chart-wrapper {
   border: $light-border;
   border-radius: $radius-large;

@@ -90,15 +90,17 @@ class BarChartComponent extends Component {
     let stackedData = stackFunction(dataset);
 
     // creates and appends tooltip
-    let container = select('.bar-chart-container');
+    // let container = select('.bar-chart-container');
+    let container = select('.tooltip-div');
     container
       .append('div')
       .attr('class', 'chart-tooltip')
-      .attr('style', 'position: absolute; opacity: 0;')
+      .attr('style', 'position: fixed; opacity: 0;')
       .style('color', 'white')
       .style('background', `${TOOLTIP_BACKGROUND}`)
       .style('font-size', '.929rem')
       .style('padding', '10px')
+      .style('z-index', '10')
       .style('border-radius', '4px');
 
     let xScale = scaleLinear()
@@ -214,8 +216,9 @@ class BarChartComponent extends Component {
         select('.chart-tooltip')
           .style('opacity', 1)
           .style('max-width', '200px')
-          .style('left', `${event.pageX - 95}px`)
-          .style('top', `${event.pageY - 155}px`)
+          // .style("top", (event.pageY - 147)+"px").style("left",(event.pageX - 310)+"px")
+          // .style('left', `${event.pageX}px`)
+          // .style('top', `${event.pageY}px`)
           .text(
             `${Math.round((chartData.total * 100) / totalCount)}% of total client counts:
             ${chartData.non_entity_tokens} active tokens, ${chartData.distinct_entities} unique entities.
