@@ -32,7 +32,7 @@ type MSSQL struct {
 	usernameProducer template.StringTemplate
 }
 
-func New() (interface{}, error) {
+func New() (dbplugin.Database, error) {
 	db := new()
 	// Wrap the plugin with middleware to sanitize errors
 	dbType := dbplugin.NewDatabaseErrorSanitizerMiddleware(db, db.secretValues)
@@ -393,5 +393,5 @@ END
 `
 
 const alterLoginSQL = `
-ALTER LOGIN [{{username}}] WITH PASSWORD = '{{password}}' 
+ALTER LOGIN [{{username}}] WITH PASSWORD = '{{password}}'
 `

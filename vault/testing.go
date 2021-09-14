@@ -2114,9 +2114,9 @@ func (m *mockBuiltinRegistry) Get(name string, pluginType consts.PluginType) (fu
 		return nil, false
 	}
 	if name == "postgresql-database-plugin" {
-		return dbPostgres.New, true
+		return toFunc(dbPostgres.New), true
 	}
-	return dbMysql.New(dbMysql.DefaultUserNameTemplate), true
+	return toFunc(dbMysql.New(dbMysql.DefaultUserNameTemplate)), true
 }
 
 // Keys only supports getting a realistic list of the keys for database plugins.
@@ -2236,4 +2236,10 @@ func (n *NoopAudit) Invalidate(ctx context.Context) {
 	n.saltMutex.Lock()
 	defer n.saltMutex.Unlock()
 	n.salt = nil
+}
+
+func toFunc(ifc interface{}) func() (interface{}, error) {
+	return func() (interface{}, error) {
+		return ifc, nil
+	}
 }

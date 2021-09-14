@@ -15,7 +15,7 @@ EXTERNAL_TOOLS=\
 GOFMT_FILES?=$$(find . -name '*.go' | grep -v pb.go | grep -v vendor)
 
 
-GO_VERSION_MIN=1.16.7
+GO_VERSION_MIN=1.16.6
 GO_CMD?=go
 CGO_ENABLED?=0
 ifneq ($(FDB_ENABLED), )
@@ -179,8 +179,8 @@ ember-dist-dev:
 	@echo "--> Building Ember application"
 	@cd ui && yarn run build:dev
 
-static-dist: ember-dist 
-static-dist-dev: ember-dist-dev 
+static-dist: ember-dist
+static-dist-dev: ember-dist-dev
 
 proto:
 	protoc vault/*.proto --go_out=plugins=grpc,paths=source_relative:.
