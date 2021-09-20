@@ -26,6 +26,8 @@ type DatabasePluginClient struct {
 	client *plugin.Client
 	sync.Mutex
 	multiplexing bool
+	id           string
+	name         string
 
 	Database
 }
@@ -39,9 +41,18 @@ func (dc *DatabasePluginClient) Close() error {
 	if !dc.multiplexing {
 		dc.client.Kill()
 	} else {
-		// TODO: This needs to e changed to clear a single entry
-		//       or kill the process if we're removing the last entry
-		multiplexedClients = make(map[string]*MultiplexedClient)
+		if _, ok := multiplexedClients[dc.name]; !ok {
+			return nil
+		}
+
+		id := fmt.Sprintf("%s_%s", dc.name, dc.id)
+		if _, ok := multiplexedClients[dc.name].connections[id]; ok {
+			delete(multiplexedClients[dc.name].connections, id)
+		}
+
+		if len(multiplexedClients[dc.name].connections) == 0 {
+			dc.client.Kill()
+		}
 	}
 
 	return err
@@ -61,12 +72,6 @@ type MultiplexedClient struct {
 func (mpc MultiplexedClient) DispensePlugin(id string) (Database, error) {
 	mpc.Lock()
 	defer mpc.Unlock()
-
-	// TODO: Remove this since this will never hit due to the ID being unique
-	//       every time
-	if db, ok := mpc.connections[id]; ok {
-		return db, nil
-	}
 
 	// Wrap clientConn with our implementation and get rid of middleware
 	// and then cast it back and return it
@@ -95,14 +100,14 @@ func (mpc MultiplexedClient) DispensePlugin(id string) (Database, error) {
 // plugin. The client is wrapped in a DatabasePluginClient object to ensure the
 // plugin is killed on call of Close().
 func NewPluginClient(ctx context.Context, sys pluginutil.RunnerUtil, pluginRunner *pluginutil.PluginRunner, logger log.Logger, isMetadataMode bool) (Database, error) {
+	id, err := base62.Random(10)
+	if err != nil {
+		return nil, err
+	}
+
 	// Case where multiplexed client exists, but we need to create a new entry
 	// for the connection
 	if mpc, ok := multiplexedClients[pluginRunner.Name]; ok {
-		id, err := base62.Random(10)
-		if err != nil {
-			return nil, err
-		}
-
 		db, err := mpc.DispensePlugin(fmt.Sprintf("%s_%s", pluginRunner.Name, id))
 		if err != nil {
 			return nil, err
@@ -114,6 +119,8 @@ func NewPluginClient(ctx context.Context, sys pluginutil.RunnerUtil, pluginRunne
 			multiplexing: true,
 			client:       mpc.client,
 			Database:     db,
+			id:           id,
+			name:         pluginRunner.Name,
 		}, nil
 	}
 
@@ -182,11 +189,6 @@ func NewPluginClient(ctx context.Context, sys pluginutil.RunnerUtil, pluginRunne
 
 			multiplexedClients[pluginRunner.Name] = mpc
 
-			id, err := base62.Random(10)
-			if err != nil {
-				return nil, err
-			}
-
 			db, err = mpc.DispensePlugin(fmt.Sprintf("%s_%s", pluginRunner.Name, id))
 			if err != nil {
 				return nil, err
@@ -202,5 +204,7 @@ func NewPluginClient(ctx context.Context, sys pluginutil.RunnerUtil, pluginRunne
 		multiplexing: multiplexed,
 		client:       client,
 		Database:     db,
+		id:           id,
+		name:         pluginRunner.Name,
 	}, nil
 }
