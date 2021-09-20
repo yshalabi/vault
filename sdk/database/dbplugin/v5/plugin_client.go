@@ -46,12 +46,11 @@ func (dc *DatabasePluginClient) Close() error {
 		}
 
 		id := fmt.Sprintf("%s_%s", dc.name, dc.id)
-		if _, ok := multiplexedClients[dc.name].connections[id]; ok {
-			delete(multiplexedClients[dc.name].connections, id)
-		}
+		delete(multiplexedClients[dc.name].connections, id)
 
 		if len(multiplexedClients[dc.name].connections) == 0 {
 			dc.client.Kill()
+			delete(multiplexedClients, dc.name)
 		}
 	}
 
